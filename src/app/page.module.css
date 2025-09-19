@@ -1,0 +1,318 @@
+/* CSS Variables */
+:root {
+  --font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+    sans-serif;
+  --container-max-width: 1200px;
+  --container-padding: 24px;
+  --primary-color: #667eea;
+  --primary-hover: #5a67d8;
+  --text-primary: #2d3748;
+  --text-secondary: #4a5568;
+  --text-muted: #718096;
+  --border-color: #e2e8f0;
+  --background-light: #f8fafc;
+  --background-card: #f7fafc;
+  --border-radius: 12px;
+  --border-radius-sm: 8px;
+  --border-radius-xs: 4px;
+  --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.1);
+  --shadow-md: 0 4px 6px rgba(0, 0, 0, 0.05);
+  --shadow-lg: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+/* Main Layout */
+.main {
+  margin: 0 auto;
+  max-width: var(--container-max-width);
+  padding: var(--container-padding);
+  font-family: var(--font-family);
+}
+
+/* Header Section */
+.header {
+  margin-bottom: 32px;
+}
+
+.title {
+  font-size: 2.5rem;
+  font-weight: 700;
+  color: #1a202c;
+  margin-bottom: 8px;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.subtitle {
+  color: #718096;
+  font-size: 1.1rem;
+  margin: 0;
+}
+
+/* Search Section */
+.searchContainer {
+  background-color: #f7fafc;
+  padding: 24px;
+  border-radius: 12px;
+  border: 1px solid #e2e8f0;
+  margin-bottom: 32px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.searchLabel {
+  display: block;
+  margin-bottom: 12px;
+  font-weight: 600;
+  color: #2d3748;
+  font-size: 1rem;
+}
+
+.searchInputContainer {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+.searchInput {
+  border: 2px solid #e2e8f0;
+  padding: 12px 16px;
+  border-radius: 8px;
+  font-size: 16px;
+  min-width: 300px;
+  flex: 1;
+  max-width: 500px;
+  transition: all 0.2s ease;
+  outline: none;
+  background-color: white;
+}
+
+.searchInput:focus {
+  border-color: #667eea;
+  box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+}
+
+.clearButton {
+  padding: 12px 24px;
+  background-color: #667eea;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  box-shadow: 0 2px 4px rgba(102, 126, 234, 0.2);
+}
+
+.clearButton:hover {
+  background-color: #5a67d8;
+  transform: translateY(-1px);
+}
+
+.searchResultsInfo {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 12px;
+}
+
+.resultsCount {
+  font-size: 14px;
+  color: #718096;
+  font-weight: 500;
+}
+
+.searchTermDisplay {
+  font-size: 14px;
+  color: #4a5568;
+  font-style: italic;
+}
+
+.searchTerm {
+  font-weight: 600;
+}
+
+/* Table Container */
+.tableContainer {
+  background-color: white;
+  border-radius: 12px;
+  border: 1px solid #e2e8f0;
+  overflow: hidden;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+}
+
+.table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 14px;
+}
+
+/* Table Header */
+.tableHeader {
+  background-color: #f8fafc;
+}
+
+.tableHeaderCell {
+  padding: 16px 20px;
+  text-align: left;
+  font-weight: 600;
+  color: #2d3748;
+  font-size: 14px;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  border-bottom: 2px solid #e2e8f0;
+}
+
+/* Table Body */
+.tableRow {
+  border-bottom: 1px solid #e2e8f0;
+  transition: all 0.2s ease;
+}
+
+.tableRow:nth-child(even) {
+  background-color: #f8fafc;
+}
+
+.tableRow:hover {
+  background-color: #edf2f7;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+.tableCell {
+  padding: 16px 20px;
+  color: #4a5568;
+}
+
+.tableCellName {
+  padding: 16px 20px;
+  color: #2d3748;
+  font-weight: 500;
+}
+
+.tableCellSpecialties {
+  padding: 16px 20px;
+  color: #4a5568;
+  max-width: 300px;
+}
+
+.tableCellExperience {
+  padding: 16px 20px;
+  color: #4a5568;
+  text-align: center;
+}
+
+.tableCellPhone {
+  padding: 16px 20px;
+  color: #4a5568;
+  font-family: monospace;
+}
+
+/* Badges and Tags */
+.degreeBadge {
+  background-color: #667eea;
+  color: white;
+  padding: 4px 8px;
+  border-radius: 4px;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.specialtiesContainer {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+}
+
+.specialtyTag {
+  background-color: #e2e8f0;
+  color: #4a5568;
+  padding: 2px 6px;
+  border-radius: 12px;
+  font-size: 11px;
+  font-weight: 500;
+}
+
+.experienceBadge {
+  background-color: #f0fff4;
+  color: #38a169;
+  padding: 4px 8px;
+  border-radius: 4px;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+/* Loading States */
+.loadingContainer {
+  margin: 0 auto;
+  max-width: var(--container-max-width);
+  padding: var(--container-padding);
+  font-family: var(--font-family);
+}
+
+.loadingTableContainer {
+  background-color: white;
+  border-radius: 12px;
+  border: 1px solid #e2e8f0;
+  overflow: hidden;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+}
+
+.loadingFallback {
+  padding: 40px;
+  text-align: center;
+}
+
+/* Error States */
+.errorContainer {
+  margin: 0 auto;
+  max-width: var(--container-max-width);
+  padding: var(--container-padding);
+  font-family: var(--font-family);
+}
+
+.errorCard {
+  text-align: center;
+  padding: 40px;
+  border: 2px solid #fed7d7;
+  border-radius: 12px;
+  background-color: #fef5e7;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+}
+
+.errorIcon {
+  font-size: 48px;
+  margin-bottom: 16px;
+}
+
+.errorTitle {
+  color: #c53030;
+  margin: 0 0 12px 0;
+  font-size: 1.5rem;
+  font-weight: 600;
+}
+
+.errorMessage {
+  color: #744210;
+  margin: 0 0 24px 0;
+  font-size: 1rem;
+}
+
+.retryButton {
+  padding: 12px 24px;
+  background-color: #667eea;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 16px;
+  font-weight: 600;
+  transition: all 0.2s ease;
+  box-shadow: 0 2px 4px rgba(102, 126, 234, 0.2);
+}
+
+.retryButton:hover {
+  background-color: #5a67d8;
+  transform: translateY(-1px);
+}

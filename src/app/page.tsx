@@ -1,6 +1,20 @@
 "use client";
 
-import { useEffect, useState, lazy, Suspense } from "react";
+import {
+  useEffect,
+  useState,
+  lazy,
+  Suspense,
+  useMemo,
+  useCallback,
+} from "react";
+import { useSearch } from "../hooks/useSearch";
+import { useDebounce } from "../hooks/useDebounce";
+import { Header } from "../components/Header";
+import { SearchSection } from "../components/SearchSection";
+import { AdvocatesTable } from "../components/AdvocatesTable";
+import { ErrorState } from "../components/ErrorState";
+import styles from "./page.module.css";
 
 interface Advocate {
   id: number;
@@ -25,9 +39,16 @@ const LoadingComponent = lazy(() =>
 
 export default function Home() {
   const [advocates, setAdvocates] = useState<Advocate[]>([]);
-  const [filteredAdvocates, setFilteredAdvocates] = useState<Advocate[]>([]);
   const [error, setError] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState<boolean>(true);
+  const [searchInput, setSearchInput] = useState<string>("");
+
+  const debouncedSearchTerm = useDebounce(searchInput, 300);
+
+  const { searchTerm, filteredAdvocates, resetSearch } = useSearch(
+    advocates,
+    debouncedSearchTerm
+  );
 
   useEffect(() => {
     const fetchAdvocates = async () => {
@@ -46,7 +67,6 @@ export default function Home() {
 
         const jsonResponse = await response.json();
         setAdvocates(jsonResponse.data);
-        setFilteredAdvocates(jsonResponse.data);
       } catch (error) {
         setError(
           error instanceof Error ? error.message : "Failed to fetch advocates"
@@ -59,33 +79,25 @@ export default function Home() {
     fetchAdvocates();
   }, []);
 
-  const onChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const searchTerm = e.target.value;
+  const handleSearchInputChange = useCallback(
+    (e: React.ChangeEvent<HTMLInputElement>) => {
+      const value = e.target.value;
+      setSearchInput(value);
 
-    const searchTermElement = document.getElementById("search-term");
-    if (searchTermElement) {
-      searchTermElement.innerHTML = searchTerm;
-    }
-    const filteredAdvocates = advocates.filter((advocate) => {
-      const lowerSearchTerm = searchTerm.toLowerCase();
-      return (
-        advocate.firstName.toLowerCase().includes(lowerSearchTerm) ||
-        advocate.lastName.toLowerCase().includes(lowerSearchTerm) ||
-        advocate.city.toLowerCase().includes(lowerSearchTerm) ||
-        advocate.degree.toLowerCase().includes(lowerSearchTerm) ||
-        advocate.specialties.some((specialty) =>
-          specialty.toLowerCase().includes(lowerSearchTerm)
-        ) ||
-        advocate.yearsOfExperience.toString().includes(searchTerm)
-      );
-    });
+      const searchTermElement = document.getElementById("search-term");
+      if (searchTermElement) {
+        searchTermElement.innerHTML = value;
+      }
+    },
+    []
+  );
 
-    setFilteredAdvocates(filteredAdvocates);
-  };
+  useEffect(() => {}, [debouncedSearchTerm]);
 
-  const onClick = () => {
-    setFilteredAdvocates(advocates);
-  };
+  const searchResultsCount = useMemo(
+    () => filteredAdvocates.length,
+    [filteredAdvocates]
+  );
 
   const retryFetch = async () => {
     try {
@@ -103,7 +115,6 @@ export default function Home() {
 
       const jsonResponse = await response.json();
       setAdvocates(jsonResponse.data);
-      setFilteredAdvocates(jsonResponse.data);
     } catch (error) {
       setError(
         error instanceof Error ? error.message : "Failed to fetch advocates"
@@ -113,96 +124,31 @@ export default function Home() {
     }
   };
 
-  isLoading && (
-    <main style={{ margin: "24px" }}>
-      <h1>Solace Advocates</h1>
-      <Suspense fallback={<div>Loading...</div>}>
-        <LoadingComponent />
-      </Suspense>
-    </main>
-  );
-
-  error && (
-    <main style={{ margin: "24px" }}>
-      <h1>Solace Advocates</h1>
-      <div
-        style={{
-          textAlign: "center",
-          marginTop: "50px",
-          padding: "20px",
-          border: "1px solid #ff6b6b",
-          borderRadius: "8px",
-          backgroundColor: "#ffe0e0",
-        }}
-      >
-        <h3 style={{ color: "#d63031", margin: "0 0 10px 0" }}>
-          Error Loading Advocates
-        </h3>
-        <p style={{ color: "#636e72", margin: "0 0 20px 0" }}>{error}</p>
-        <button
-          onClick={retryFetch}
-          style={{
-            padding: "10px 20px",
-            backgroundColor: "#0984e3",
-            color: "white",
-            border: "none",
-            borderRadius: "4px",
-            cursor: "pointer",
-          }}
-        >
-          Try Again
-        </button>
-      </div>
-    </main>
-  );
+  if (error) {
+    return <ErrorState error={error} onRetry={retryFetch} />;
+  }
 
   return (
-    <main style={{ margin: "24px" }}>
-      <h1>Solace Advocates</h1>
-      <br />
-      <br />
-      <div>
-        <p>Search</p>
-        <p>
-          Searching for: <span id="search-term"></span>
-        </p>
-        <input style={{ border: "1px solid black" }} onChange={onChange} />
-        <button onClick={onClick}>Reset Search</button>
-      </div>
-      <br />
-      <br />
-      <table>
-        <thead>
-          <tr>
-            <th>First Name</th>
-            <th>Last Name</th>
-            <th>City</th>
-            <th>Degree</th>
-            <th>Specialties</th>
-            <th>Years of Experience</th>
-            <th>Phone Number</th>
-          </tr>
-        </thead>
-        <tbody>
-          {filteredAdvocates.map((advocate) => {
-            return (
-              <tr key={advocate.id}>
-                <td>{advocate.firstName}</td>
-                <td>{advocate.lastName}</td>
-                <td>{advocate.city}</td>
-                <td>{advocate.degree}</td>
-                <td>
-                  {advocate.specialties.map((s) => (
-                    <div key={`${advocate.id}-${s}`}>{s}</div>
-                  ))}
-                </td>
-                <td>{advocate.yearsOfExperience}</td>
-                <td>{advocate.phoneNumber}</td>
-              </tr>
-            );
-          })}
-        </tbody>
-      </table>
+    <main className={styles.main}>
+      <Header />
+
+      <SearchSection
+        searchInput={searchInput}
+        onSearchChange={handleSearchInputChange}
+        onClearSearch={() => {
+          setSearchInput("");
+          resetSearch();
+        }}
+        searchTerm={searchTerm}
+        searchResultsCount={searchResultsCount}
+      />
+
+      <AdvocatesTable
+        advocates={filteredAdvocates}
+        isLoading={isLoading}
+        searchTerm={searchTerm}
+        onClearSearch={() => setSearchInput("")}
+      />
     </main>
   );
 }
