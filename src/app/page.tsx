@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, lazy, Suspense } from "react";
 
 interface Advocate {
   id: number;
@@ -13,28 +13,50 @@ interface Advocate {
   phoneNumber: number;
 }
 
+const LoadingComponent = lazy(() =>
+  Promise.resolve({
+    default: () => (
+      <div style={{ textAlign: "center", marginTop: "50px" }}>
+        <p>Loading advocates...</p>
+      </div>
+    ),
+  })
+);
+
 export default function Home() {
   const [advocates, setAdvocates] = useState<Advocate[]>([]);
   const [filteredAdvocates, setFilteredAdvocates] = useState<Advocate[]>([]);
+  const [error, setError] = useState<string | null>(null);
+  const [isLoading, setIsLoading] = useState<boolean>(true);
 
   useEffect(() => {
-    console.log("fetching advocates...");
-    fetch("/api/advocates")
-      .then((response) => {
+    const fetchAdvocates = async () => {
+      try {
+        setIsLoading(true);
+        setError(null);
+
+        const response = await fetch("/api/advocates");
+
         if (!response.ok) {
-          throw new Error(`HTTP error! status: ${response.status}`);
+          const errorData = await response.json().catch(() => ({}));
+          throw new Error(
+            errorData.error || `HTTP error! status: ${response.status}`
+          );
         }
-        return response.json();
-      })
-      .then((jsonResponse) => {
+
+        const jsonResponse = await response.json();
         setAdvocates(jsonResponse.data);
         setFilteredAdvocates(jsonResponse.data);
-      })
-      .catch((error) => {
-        console.error("Error fetching advocates:", error);
-        // You could add a user-friendly error message here
-        // For now, we'll just log the error
-      });
+      } catch (error) {
+        setError(
+          error instanceof Error ? error.message : "Failed to fetch advocates"
+        );
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchAdvocates();
   }, []);
 
   const onChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -44,16 +66,15 @@ export default function Home() {
     if (searchTermElement) {
       searchTermElement.innerHTML = searchTerm;
     }
-
-    console.log("filtering advocates...");
     const filteredAdvocates = advocates.filter((advocate) => {
+      const lowerSearchTerm = searchTerm.toLowerCase();
       return (
-        advocate.firstName.includes(searchTerm) ||
-        advocate.lastName.includes(searchTerm) ||
-        advocate.city.includes(searchTerm) ||
-        advocate.degree.includes(searchTerm) ||
+        advocate.firstName.toLowerCase().includes(lowerSearchTerm) ||
+        advocate.lastName.toLowerCase().includes(lowerSearchTerm) ||
+        advocate.city.toLowerCase().includes(lowerSearchTerm) ||
+        advocate.degree.toLowerCase().includes(lowerSearchTerm) ||
         advocate.specialties.some((specialty) =>
-          specialty.includes(searchTerm)
+          specialty.toLowerCase().includes(lowerSearchTerm)
         ) ||
         advocate.yearsOfExperience.toString().includes(searchTerm)
       );
@@ -63,9 +84,77 @@ export default function Home() {
   };
 
   const onClick = () => {
-    console.log(advocates);
     setFilteredAdvocates(advocates);
   };
+
+  const retryFetch = async () => {
+    try {
+      setError(null);
+      setIsLoading(true);
+
+      const response = await fetch("/api/advocates");
+
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}));
+        throw new Error(
+          errorData.error || `HTTP error! status: ${response.status}`
+        );
+      }
+
+      const jsonResponse = await response.json();
+      setAdvocates(jsonResponse.data);
+      setFilteredAdvocates(jsonResponse.data);
+    } catch (error) {
+      setError(
+        error instanceof Error ? error.message : "Failed to fetch advocates"
+      );
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  isLoading && (
+    <main style={{ margin: "24px" }}>
+      <h1>Solace Advocates</h1>
+      <Suspense fallback={<div>Loading...</div>}>
+        <LoadingComponent />
+      </Suspense>
+    </main>
+  );
+
+  error && (
+    <main style={{ margin: "24px" }}>
+      <h1>Solace Advocates</h1>
+      <div
+        style={{
+          textAlign: "center",
+          marginTop: "50px",
+          padding: "20px",
+          border: "1px solid #ff6b6b",
+          borderRadius: "8px",
+          backgroundColor: "#ffe0e0",
+        }}
+      >
+        <h3 style={{ color: "#d63031", margin: "0 0 10px 0" }}>
+          Error Loading Advocates
+        </h3>
+        <p style={{ color: "#636e72", margin: "0 0 20px 0" }}>{error}</p>
+        <button
+          onClick={retryFetch}
+          style={{
+            padding: "10px 20px",
+            backgroundColor: "#0984e3",
+            color: "white",
+            border: "none",
+            borderRadius: "4px",
+            cursor: "pointer",
+          }}
+        >
+          Try Again
+        </button>
+      </div>
+    </main>
+  );
 
   return (
     <main style={{ margin: "24px" }}>
